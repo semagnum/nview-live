@@ -37,7 +37,7 @@ class NL_PT_Budgeting(bpy.types.Panel):
         layout = self.layout
         window_manager = context.window_manager
         row = layout.row()
-        row.prop(window_manager, 'nl_budget_option', expand=True)
+        row.prop(window_manager, 'nl_budget_option')
         row.enabled = not window_manager.nl_is_running
 
         box = layout.box()
