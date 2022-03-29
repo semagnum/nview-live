@@ -11,4 +11,4 @@ class BaseBudget:
 
     def draw(self, context, layout):
         # empty base case
-        pass
+        layout.label(text="Show all visible objects")
