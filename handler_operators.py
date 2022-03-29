@@ -15,6 +15,11 @@ allowed_navigation_types = {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'MIDDLEMOUSE',
                             'NUMPAD_7', 'NUMPAD_8', 'NUMPAD_9', 'NUMPAD_0', 'NUMPAD_PERIOD'}
 
 
+def build_obj_budget_cost_cache(all_objs, context):
+    budgeter = budget_factory(context)()
+    return {obj.name_full: budgeter.budget_cost(context, obj) for obj in all_objs}
+
+
 class NL_OT_ViewportLive(bpy.types.Operator):
     bl_idname = 'semagnum_nview_live.viewport'
     bl_label = 'Run nView Live'
@@ -53,7 +58,7 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         if self.last_call > self.run_delay and not self.has_updated:
             self.has_updated = True
             try:
-                viewport_handler(context, self.viable_objs)
+                viewport_handler(context, self.viable_objs, self.cost_cache)
             except Exception as e:
                 self.report({'ERROR'}, 'Exiting due to internal error: {}'.format(str(e)))
                 context.window_manager.nl_is_running = False
@@ -65,30 +70,31 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def execute(self, context):
-        if context.area.type == 'VIEW_3D':
-            self.last_call = time.time()
-            self.has_updated = True
-            wm = context.window_manager
-            excluded_objs = {}
-
-            wm.nl_is_running = True
-
-            if wm.nl_exclude_instanced_objects:
-                excluded_objs = set(find_instanced_objs_in_colls(context.scene.collection))
-
-            valid_obj_types = {o_type.obj_type for o_type in self.obj_types.values() if o_type.enabled}
-
-            self.viable_objs = {o for o in context.scene.objects if o.type in valid_obj_types} - excluded_objs
-
-            context.area.header_text_set("nView Live enabled. RMB, ESC: cancel")
-
-            self._handler = add_viewport_handler(self)
-            context.window_manager.modal_handler_add(self)
-            return {'RUNNING_MODAL'}
-        else:
+        if context.area.type != 'VIEW_3D':
             self.report({'WARNING'}, "View3D not found, cannot run operator")
-            context.window_manager.nl_is_running = False
             return {'CANCELLED'}
+
+        self.last_call = time.time()
+        self.has_updated = True
+        wm = context.window_manager
+        excluded_objs = {}
+
+        wm.nl_is_running = True
+
+        if wm.nl_exclude_instanced_objects:
+            excluded_objs = set(find_instanced_objs_in_colls(context.scene.collection))
+
+        valid_obj_types = {o_type.obj_type for o_type in self.obj_types.values() if o_type.enabled}
+
+        self.viable_objs = {o for o in context.scene.objects if o.type in valid_obj_types} - excluded_objs
+
+        self.cost_cache = build_obj_budget_cost_cache(self.viable_objs, context)
+
+        context.area.header_text_set("nView Live enabled. RMB, ESC: cancel")
+
+        self._handler = add_viewport_handler(self)
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
         for obj_type, obj_name, icon, enabled in obj_types:

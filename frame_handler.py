@@ -58,12 +58,11 @@ def filter_viable_objs(context, viewport_location, max_distance, viable_objs: se
                 print('Could not hide {}: {}'.format(o.name, e))
 
 
-def parse_optimal_objs(context, viable_objects):
-    budgeter = budget_factory(context)()
+def parse_optimal_objs(context, viable_objects, budget_cache: dict):
+    my_budget = budget_factory(context)().budget_limit(context)
     curr_count = 0
-    my_budget = budgeter.budget_limit(context)
     for idx, o in enumerate(viable_objects):
-        o_cost = budgeter.budget_cost(context, o)
+        o_cost = budget_cache.get(o.name_full, 0)
         above_budget = (curr_count + o_cost) > my_budget
         if above_budget:
             return idx
@@ -77,7 +76,7 @@ def parse_optimal_objs(context, viable_objects):
     return len(viable_objects)
 
 
-def viewport_handler(context, viable_objs):
+def viewport_handler(context, viable_objs, budget_cache: dict):
     wm = context.window_manager
 
     viewport_location = context.region_data.view_matrix.to_translation()
@@ -86,7 +85,7 @@ def viewport_handler(context, viable_objs):
 
     filtered_objs = list(filter_viable_objs(context, viewport_location, max_distance, viable_objs))
 
-    split_index = parse_optimal_objs(context, filtered_objs)
+    split_index = parse_optimal_objs(context, filtered_objs, budget_cache)
 
     for o in filtered_objs[:split_index]:
         if o.hide_get():
