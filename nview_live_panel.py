@@ -33,6 +33,9 @@ class NL_PT_Budgeting(bpy.types.Panel):
     bl_parent_id = 'NL_PT_nview_live'
     bl_context = 'objectmode'
 
+    def draw_header(self, context):
+        self.layout.prop(context.window_manager, 'nl_use_budget', text='')
+
     def draw(self, context):
         layout = self.layout
         window_manager = context.window_manager
@@ -41,5 +44,5 @@ class NL_PT_Budgeting(bpy.types.Panel):
         row.enabled = not window_manager.nl_is_running
 
         box = layout.box()
-        budget_option = budget_factory(context)()
+        budget_option = budget_factory(context, is_layout=True)()
         budget_option.draw(context, box)
