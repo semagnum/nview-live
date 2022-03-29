@@ -1,6 +1,8 @@
 import bpy
 import time
 
+from .obj_config import obj_types
+from .ObjType import ObjType
 from .coll_util import find_instanced_objs_in_colls
 from .frame_handler import viewport_handler, add_viewport_handler, remove_viewport_handler
 from .budget import budget_factory
@@ -15,18 +17,31 @@ allowed_navigation_types = {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'MIDDLEMOUSE',
 
 class NL_OT_ViewportLive(bpy.types.Operator):
     bl_idname = 'semagnum_nview_live.viewport'
-    bl_label = 'nView Live for viewport'
-    bl_description = 'Enable modal for nView live updates in active viewport'
+    bl_label = 'Run nView Live'
+    bl_description = 'Automatically hide/show objects in the viewport'
     bl_options = {'REGISTER'}
 
     run_delay: bpy.props.FloatProperty(
-        name='Call delay',
+        name='Update delay',
         description='Delay before nView starts updating after view change (in seconds)',
         default=1.0,
-        min=0.0,
+        min=0.1,
+        subtype='TIME',
+        unit='TIME',
         soft_min=0.1,
         soft_max=2.0,
     )
+
+    obj_types: bpy.props.CollectionProperty(type=ObjType)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, 'run_delay', slider=True)
+
+        layout.label(text='Object types:')
+        col = layout.column(align=True)
+        for obj_type in self.obj_types.values():
+            col.prop(obj_type, 'enabled', text=obj_type.obj_name, toggle=True, icon=obj_type.icon)
 
     def modal(self, context, event):
         if event.type in {'ESC', 'RIGHTMOUSE'}:
@@ -44,13 +59,12 @@ class NL_OT_ViewportLive(bpy.types.Operator):
                 context.window_manager.nl_is_running = False
                 return {'CANCELLED'}
 
-
         if event.type in allowed_navigation_types:
             return {'PASS_THROUGH'}
 
         return {'RUNNING_MODAL'}
 
-    def invoke(self, context, event):
+    def execute(self, context):
         if context.area.type == 'VIEW_3D':
             self.last_call = time.time()
             self.has_updated = True
@@ -62,8 +76,9 @@ class NL_OT_ViewportLive(bpy.types.Operator):
             if wm.nl_exclude_instanced_objects:
                 excluded_objs = set(find_instanced_objs_in_colls(context.scene.collection))
 
-            object_validator = budget_factory(context)()
-            self.viable_objs = {o for o in context.scene.objects if object_validator.is_viable_obj(o)} - excluded_objs
+            valid_obj_types = {o_type.obj_type for o_type in self.obj_types.values() if o_type.enabled}
+
+            self.viable_objs = {o for o in context.scene.objects if o.type in valid_obj_types} - excluded_objs
 
             context.area.header_text_set("nView Live enabled. RMB, ESC: cancel")
 
@@ -74,3 +89,13 @@ class NL_OT_ViewportLive(bpy.types.Operator):
             self.report({'WARNING'}, "View3D not found, cannot run operator")
             context.window_manager.nl_is_running = False
             return {'CANCELLED'}
+
+    def invoke(self, context, event):
+        for obj_type, obj_name, icon, enabled in obj_types:
+            new_type = self.obj_types.add()
+            new_type.obj_type = obj_type
+            new_type.obj_name = obj_name
+            new_type.icon = icon
+            new_type.enabled = enabled
+        return context.window_manager.invoke_props_dialog(self)
+

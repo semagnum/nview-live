@@ -37,9 +37,6 @@ def get_bmesh_data(obj, depsgraph):
 
 class TriBudget(BaseBudget):
 
-    def is_viable_obj(self, obj) -> bool:
-        return obj.type == 'MESH'
-
     def budget_limit(self, context) -> int:
         return context.window_manager.nl_tri_budget
 

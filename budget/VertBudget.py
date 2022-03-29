@@ -4,9 +4,6 @@ from .stat_format_util import format_num
 
 class VertBudget(BaseBudget):
 
-    def is_viable_obj(self, obj) -> bool:
-        return obj.type == 'MESH'
-
     def budget_limit(self, context) -> int:
         return context.window_manager.nl_vert_budget
 
