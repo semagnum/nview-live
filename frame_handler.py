@@ -1,5 +1,4 @@
 import bpy
-from mathutils import Vector
 import time
 import bpy_extras
 from .budget import budget_factory
@@ -44,11 +43,9 @@ def is_visible_to_camera(context, location_coords):
     return True
 
 
-def filter_viable_objs(context, viewport_location, max_distance, viable_objs: set):
+def filter_viable_objs(context, viewport_location, max_distance, viable_objs: set, bb_cache: dict):
     for o in viable_objs:
-        matrix_world = o.matrix_world
-
-        bb_locs = ((matrix_world @ Vector(v)) for v in o.bound_box)
+        bb_locs = bb_cache.get(o.name_full)
         if close_to_camera(viewport_location, bb_locs, max_distance) and is_visible_to_camera(context, bb_locs):
             yield o
         elif not o.hide_get():
@@ -76,14 +73,14 @@ def parse_optimal_objs(context, viable_objects, budget_cache: dict):
     return len(viable_objects)
 
 
-def viewport_handler(context, viable_objs, budget_cache: dict):
+def viewport_handler(context, viable_objs, budget_cache: dict, bb_cache: dict):
     wm = context.window_manager
 
     viewport_location = context.region_data.view_matrix.to_translation()
 
     max_distance = wm.nl_max_distance
 
-    filtered_objs = list(filter_viable_objs(context, viewport_location, max_distance, viable_objs))
+    filtered_objs = list(filter_viable_objs(context, viewport_location, max_distance, viable_objs, bb_cache))
 
     split_index = parse_optimal_objs(context, filtered_objs, budget_cache)
 

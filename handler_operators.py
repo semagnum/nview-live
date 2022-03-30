@@ -6,6 +6,7 @@ from .ObjType import ObjType
 from .coll_util import find_instanced_objs_in_colls
 from .frame_handler import viewport_handler, add_viewport_handler, remove_viewport_handler
 from .budget import budget_factory
+from .BoundBoxCache import BoundBoxCache
 
 allowed_navigation_types = {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'MIDDLEMOUSE',
                             'RIGHTMOUSE', 'LEFTMOUSE',
@@ -17,7 +18,10 @@ allowed_navigation_types = {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'MIDDLEMOUSE',
 
 def build_obj_budget_cost_cache(all_objs, context):
     budgeter = budget_factory(context)()
-    return {obj.name_full: budgeter.budget_cost(context, obj) for obj in all_objs}
+    budget_cache = {obj.name_full: budgeter.budget_cost(context, obj) for obj in all_objs}
+    bb_cache_calculator = BoundBoxCache()
+    bound_box_cache = {obj.name_full: bb_cache_calculator.bound_box_calc(obj) for obj in all_objs}
+    return budget_cache, bound_box_cache
 
 
 class NL_OT_ViewportLive(bpy.types.Operator):
@@ -37,11 +41,18 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         soft_max=2.0,
     )
 
+    exclude_objs_in_instances: bpy.props.BoolProperty(name='Exclude instanced objects',
+                                                      description='Exclude objects in collection instances from '
+                                                                  'visibility tests (can make instances seem hidden '
+                                                                  'when they are not)',
+                                                      default=True)
+
     obj_types: bpy.props.CollectionProperty(type=ObjType)
 
     def draw(self, context):
         layout = self.layout
         layout.prop(self, 'run_delay', slider=True)
+        layout.prop(self, 'exclude_objs_in_instances')
 
         layout.label(text='Object types:')
         col = layout.column(align=True)
@@ -58,7 +69,7 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         if self.last_call > self.run_delay and not self.has_updated:
             self.has_updated = True
             try:
-                viewport_handler(context, self.viable_objs, self.cost_cache)
+                viewport_handler(context, self.viable_objs, self.cost_cache, self.bb_cache)
             except Exception as e:
                 self.report({'ERROR'}, 'Exiting due to internal error: {}'.format(str(e)))
                 context.window_manager.nl_is_running = False
@@ -75,25 +86,30 @@ class NL_OT_ViewportLive(bpy.types.Operator):
             return {'CANCELLED'}
 
         self.last_call = time.time()
-        self.has_updated = True
+        self.has_updated = False
         wm = context.window_manager
-        excluded_objs = {}
+        excluded_objs = set()
 
         wm.nl_is_running = True
 
-        if wm.nl_exclude_instanced_objects:
-            excluded_objs = set(find_instanced_objs_in_colls(context.scene.collection))
+        if self.exclude_objs_in_instances:
+            excluded_objs = {o.name_full for o in find_instanced_objs_in_colls(context.scene.collection)}
 
         valid_obj_types = {o_type.obj_type for o_type in self.obj_types.values() if o_type.enabled}
 
-        self.viable_objs = {o for o in context.scene.objects if o.type in valid_obj_types} - excluded_objs
+        self.viable_objs = {o
+                            for o in context.scene.objects
+                            if o.type in valid_obj_types
+                            and o.name_full not in excluded_objs}
 
-        self.cost_cache = build_obj_budget_cost_cache(self.viable_objs, context)
+        self.cost_cache, self.bb_cache = build_obj_budget_cost_cache(self.viable_objs, context)
 
         context.area.header_text_set("nView Live enabled. RMB, ESC: cancel")
 
         self._handler = add_viewport_handler(self)
         context.window_manager.modal_handler_add(self)
+
+        self.report({'INFO'}, 'Initialization done, ready to navigate 3D view')
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
@@ -104,4 +120,3 @@ class NL_OT_ViewportLive(bpy.types.Operator):
             new_type.icon = icon
             new_type.enabled = enabled
         return context.window_manager.invoke_props_dialog(self)
-

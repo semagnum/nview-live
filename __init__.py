@@ -42,9 +42,6 @@ properties = [
     ('nl_max_objects', bpy.props.IntProperty(name='Max objects',
                                              description='Max number of viable objects to show at a time',
                                              default=100, min=1, soft_min=10, soft_max=10000)),
-    ('nl_exclude_instanced_objects', bpy.props.BoolProperty(name='Exclude instanced objects',
-                                                            description='Exclude objects that are instanced',
-                                                            default=True)),
     ('nl_is_running', bpy.props.BoolProperty(options={'HIDDEN'}, default=False))
 ]
 

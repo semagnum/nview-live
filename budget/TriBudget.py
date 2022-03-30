@@ -4,17 +4,6 @@ import bmesh
 from .stat_format_util import format_num
 
 
-def get_tri_count(obj, depsgraph, collection_tri_count_cache: dict):
-    if obj.type == 'MESH':
-        return get_bmesh_data(obj, depsgraph)
-    elif obj.type == 'EMPTY' and obj.is_instancer and obj.instance_type == 'COLLECTION':
-        col_name = obj.instance_collection.name
-        if col_name in collection_tri_count_cache:
-            return collection_tri_count_cache[col_name]
-        return sum(get_tri_count(o, depsgraph, collection_tri_count_cache) for o in obj.instance_collection.all_objects)
-    return 0
-
-
 def get_bmesh_data(obj, depsgraph):
     """
     Gets bmesh stats for object
@@ -37,11 +26,26 @@ def get_bmesh_data(obj, depsgraph):
 
 class TriBudget(BaseBudget):
 
+    def __init__(self):
+        self.collection_cache = {}
+
+    def get_tri_count(self, obj, depsgraph):
+        if obj.type == 'MESH':
+            return get_bmesh_data(obj, depsgraph)
+        elif obj.type == 'EMPTY' and obj.is_instancer and obj.instance_type == 'COLLECTION':
+            col_name = obj.instance_collection.name
+            if col_name in self.collection_cache:
+                return self.collection_cache[col_name]
+            instance_cost = sum(self.get_tri_count(o, depsgraph) for o in obj.instance_collection.all_objects)
+            self.collection_cache[col_name] = instance_cost
+            return instance_cost
+        return 0
+
     def budget_limit(self, context) -> int:
         return context.window_manager.nl_tri_budget
 
     def budget_cost(self, context, obj) -> int:
-        return get_tri_count(obj, context.evaluated_depsgraph_get(), {}) if obj.type == 'MESH' else 0
+        return self.get_tri_count(obj, context.evaluated_depsgraph_get())
 
     def draw(self, context, layout):
         layout.prop(context.window_manager, 'nl_tri_budget', slider=True)

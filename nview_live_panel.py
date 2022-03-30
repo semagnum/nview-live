@@ -20,7 +20,6 @@ class NL_PT_NViewLive(bpy.types.Panel):
 
         layout.separator()
         layout.prop(window_manager, 'nl_max_distance', slider=True)
-        layout.prop(window_manager, 'nl_exclude_instanced_objects')
         layout.operator('object.hide_view_clear', icon='HIDE_OFF')
 
 
