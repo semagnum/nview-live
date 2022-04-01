@@ -97,22 +97,24 @@ def viewport_handler(context, viable_objs, budget_cache: dict, bb_cache: dict):
 
     split_index = parse_optimal_objs(context, filtered_objs, budget_cache)
 
-    for o in filtered_objs[:split_index]:
-        if o.hide_get():
-            try:
-                o.hide_set(False)
-            except Exception as e:
-                print('Could not unhide {}: {}'.format(o.name, e))
+    objs_to_reveal = (o for o in filtered_objs[:split_index] if o.hide_get())
+
+    for o in objs_to_reveal:
+        try:
+            o.hide_set(False)
+        except Exception as e:
+            print('Could not unhide {}: {}'.format(o.name, e))
 
     if split_index >= len(filtered_objs):
         return
 
-    for o in filtered_objs[split_index:]:
-        if not o.hide_get():
-            try:
-                o.hide_set(True)
-            except Exception as e:
-                print('Could not hide {}: {}'.format(o.name, e))
+    objs_to_hide = (o for o in filtered_objs[split_index:] if not o.hide_get())
+
+    for o in objs_to_hide:
+        try:
+            o.hide_set(True)
+        except Exception as e:
+            print('Could not hide {}: {}'.format(o.name, e))
 
 
 def viewport_draw_handler(self):
