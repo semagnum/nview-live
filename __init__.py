@@ -20,6 +20,7 @@ properties = [
     ('nl_max_distance', bpy.props.FloatProperty(name='Max Distance',
                                                 description='Maximum distance of objects allowed to test visibility',
                                                 default=100.0,
+                                                unit='LENGTH', subtype='DISTANCE',
                                                 min=0.0, soft_min=0.0, soft_max=1000.0, step=100)),
     ('nl_tri_budget', bpy.props.IntProperty(name='Max Tris',
                                             description='Maximum number of triangles to show in viewport',
