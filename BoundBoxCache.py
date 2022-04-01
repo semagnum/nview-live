@@ -28,20 +28,19 @@ class BoundBoxCache:
             coll_instance_offset = Vector(obj.instance_collection.instance_offset)
             coll_instance_offset.negate()
             bound_boxes = [
-                              [(coll_obj.matrix_world @ v) + coll_instance_offset for v in
+                              [v + coll_instance_offset for v in
                                self.bound_box_calc(coll_obj)]
                               for coll_obj
                               in obj.instance_collection.all_objects] + [obj.bound_box]
             x1, x2 = min((x for b in bound_boxes for x, _, _ in b)), max((x for b in bound_boxes for x, _, _ in b))
             y1, y2 = min((y for b in bound_boxes for _, y, _ in b)), max((y for b in bound_boxes for _, y, _ in b))
             z1, z2 = min((z for b in bound_boxes for _, _, z in b)), max((z for b in bound_boxes for _, _, z in b))
-            coalesced_bb = [Vector((x1, y1, z1)), Vector((x1, y1, z2)), Vector((x1, y2, z2)),
-                                   Vector((x1, y2, z1)),
-                                   Vector((x2, y1, z1)), Vector((x2, y1, z2)), Vector((x2, y2, z2)),
-                                   Vector((x2, y2, z1))]
+            coalesced_bb = [Vector((x1, y1, z1)), Vector((x1, y1, z2)), Vector((x1, y2, z2)), Vector((x1, y2, z1)),
+                            Vector((x2, y1, z1)), Vector((x2, y1, z2)), Vector((x2, y2, z2)), Vector((x2, y2, z1))]
             self.collection_cache[coll_name] = coalesced_bb
-            self.object_cache[obj.name_full] = coalesced_bb
-            return [obj.matrix_world @ v for v in coalesced_bb]
+            obj_box = [obj.matrix_world @ v for v in coalesced_bb]
+            self.object_cache[obj.name_full] = obj_box
+            return obj_box
 
         if valid_bound_box(obj):
             obj_box = [obj.matrix_world @ Vector((v[0], v[1], v[2])) for v in obj.bound_box]
