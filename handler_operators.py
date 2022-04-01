@@ -8,12 +8,7 @@ from .frame_handler import viewport_handler, add_viewport_handler, remove_viewpo
 from .budget import budget_factory
 from .BoundBoxCache import BoundBoxCache
 
-allowed_navigation_types = {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'MIDDLEMOUSE',
-                            'RIGHTMOUSE', 'LEFTMOUSE',
-                            'WHEELUPMOUSE', 'WHEELDOWNMOUSE', 'MOUSESMARTZOOM', 'TRACKPADZOOM', 'TRACKPADPAN',
-                            'MOUSEROTATE', 'WHEELINMOUSE', 'WHEELOUTMOUSE',
-                            'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_4', 'NUMPAD_5', 'NUMPAD_6',
-                            'NUMPAD_7', 'NUMPAD_8', 'NUMPAD_9', 'NUMPAD_0', 'NUMPAD_PERIOD'}
+allowed_navigation_types = {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'RIGHTMOUSE', 'LEFTMOUSE' }
 
 
 def build_obj_budget_cost_cache(all_objs, context):
@@ -59,12 +54,38 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         for obj_type in self.obj_types.values():
             col.prop(obj_type, 'enabled', text=obj_type.obj_name, toggle=True, icon=obj_type.icon)
 
+    def update_caches(self, context):
+        excluded_objs = set()
+        if self.exclude_objs_in_instances:
+            excluded_objs = {o.name_full for o in find_instanced_objs_in_colls(context.scene.collection)}
+
+        valid_obj_types = {o_type.obj_type for o_type in self.obj_types.values() if o_type.enabled}
+
+        self.viable_objs = {o
+                            for o in context.scene.objects
+                            if o.type in valid_obj_types
+                            and o.name_full not in excluded_objs
+                            and not o.hide_viewport}
+
+        self.cost_cache, self.bb_cache = build_obj_budget_cost_cache(self.viable_objs, context)
+        self.report({'INFO'}, 'Caching done, ready to use')
+
+    def cancel(self, context):
+        context.window_manager.nl_is_running = False
+        context.area.header_text_set(text=None)
+        remove_viewport_handler(self._handler)
+        return {'CANCELLED'}
+
     def modal(self, context, event):
+        for kc in context.window_manager.keyconfigs:
+            for km in kc.keymaps:
+                found_keymap = km.keymap_items.match_event(event)
+                if found_keymap is not None and (found_keymap.idname.startswith('view3d')
+                        or (km.name == 'Frames' and found_keymap.idname.startswith('screen'))):
+                    return {'PASS_THROUGH'}
+
         if event.type in {'ESC', 'RIGHTMOUSE'}:
-            context.window_manager.nl_is_running = False
-            context.area.header_text_set(text=None)
-            remove_viewport_handler(self._handler)
-            return {'CANCELLED'}
+            return self.cancel(context)
 
         if self.last_call > self.run_delay and not self.has_updated:
             self.has_updated = True
@@ -72,13 +93,9 @@ class NL_OT_ViewportLive(bpy.types.Operator):
                 viewport_handler(context, self.viable_objs, self.cost_cache, self.bb_cache)
             except Exception as e:
                 self.report({'ERROR'}, 'Exiting due to internal error: {}'.format(str(e)))
-                context.window_manager.nl_is_running = False
-                return {'CANCELLED'}
+                return self.cancel(context)
 
-        if event.type in allowed_navigation_types:
-            return {'PASS_THROUGH'}
-
-        return {'RUNNING_MODAL'}
+        return {'PASS_THROUGH'}
 
     def execute(self, context):
         if context.area.type != 'VIEW_3D':
@@ -88,28 +105,15 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         self.last_call = time.time()
         self.has_updated = False
         wm = context.window_manager
-        excluded_objs = set()
 
         wm.nl_is_running = True
 
-        if self.exclude_objs_in_instances:
-            excluded_objs = {o.name_full for o in find_instanced_objs_in_colls(context.scene.collection)}
-
-        valid_obj_types = {o_type.obj_type for o_type in self.obj_types.values() if o_type.enabled}
-
-        self.viable_objs = {o
-                            for o in context.scene.objects
-                            if o.type in valid_obj_types
-                            and o.name_full not in excluded_objs}
-
-        self.cost_cache, self.bb_cache = build_obj_budget_cost_cache(self.viable_objs, context)
+        self.update_caches(context)
 
         context.area.header_text_set("nView Live enabled. RMB, ESC: cancel")
 
         self._handler = add_viewport_handler(self)
         context.window_manager.modal_handler_add(self)
-
-        self.report({'INFO'}, 'Initialization done, ready to navigate 3D view')
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):

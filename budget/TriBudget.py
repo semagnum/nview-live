@@ -48,5 +48,9 @@ class TriBudget(BaseBudget):
         return self.get_tri_count(obj, context.evaluated_depsgraph_get())
 
     def draw(self, context, layout):
-        layout.prop(context.window_manager, 'nl_tri_budget', slider=True)
-        layout.label(text='Only show up to {} triangles'.format(format_num(context.window_manager.nl_tri_budget)))
+        wm = context.window_manager
+        row = layout.row()
+        row.prop(wm, 'nl_tri_budget', slider=True)
+        row.prop(wm, 'nl_budget_sort_order', expand=True, icon_only=True)
+        layout.label(text='Only show up to {} triangles'.format(format_num(wm.nl_tri_budget)))
+

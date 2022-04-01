@@ -26,5 +26,8 @@ class VertBudget(BaseBudget):
         return self.get_vert_count(obj)
 
     def draw(self, context, layout):
-        layout.prop(context.window_manager, 'nl_vert_budget', slider=True)
-        layout.label(text='Only show up to {} vertices'.format(format_num(context.window_manager.nl_vert_budget)))
+        wm = context.window_manager
+        row = layout.row()
+        row.prop(wm, 'nl_vert_budget', slider=True)
+        row.prop(wm, 'nl_budget_sort_order', expand=True, icon_only=True)
+        layout.label(text='Only show up to {} vertices'.format(format_num(wm.nl_vert_budget)))

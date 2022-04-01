@@ -19,6 +19,10 @@ def close_to_camera(camera_location, locs, max_dist):
     return any((loc - camera_location).length < max_dist for loc in locs)
 
 
+def dist_to_camera(camera_location, locs: list):
+    return min((loc - camera_location).length for loc in locs)
+
+
 def is_visible_to_camera(context, location_coords):
     region_3d = context.space_data.region_3d
     region = context.region
@@ -81,6 +85,15 @@ def viewport_handler(context, viable_objs, budget_cache: dict, bb_cache: dict):
     max_distance = wm.nl_max_distance
 
     filtered_objs = list(filter_viable_objs(context, viewport_location, max_distance, viable_objs, bb_cache))
+    if wm.nl_use_budget:
+        if wm.nl_budget_option != 'objects':
+            budget_sort_reverse = -1 if wm.nl_budget_sort_order == 'ascending' else 1
+            filtered_objs.sort(key=lambda obj: (
+                budget_sort_reverse * budget_cache.get(obj.name_full, 0),
+                dist_to_camera(viewport_location, bb_cache.get(obj.name_full, []))
+            ))
+        else:
+            filtered_objs.sort(key=lambda obj: dist_to_camera(viewport_location, bb_cache.get(obj.name_full, []) + [obj.matrix_world.to_translation()]))
 
     split_index = parse_optimal_objs(context, filtered_objs, budget_cache)
 
