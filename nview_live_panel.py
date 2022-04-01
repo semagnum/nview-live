@@ -31,9 +31,13 @@ class NL_PT_Budgeting(bpy.types.Panel):
     bl_idname = 'NL_PT_budgeting'
     bl_parent_id = 'NL_PT_nview_live'
     bl_context = 'objectmode'
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw_header(self, context):
-        self.layout.prop(context.window_manager, 'nl_use_budget', text='')
+        layout = self.layout
+        window_manager = context.window_manager
+        layout.enabled = not window_manager.nl_is_running
+        layout.prop(window_manager, 'nl_use_budget', text='')
 
     def draw(self, context):
         layout = self.layout
