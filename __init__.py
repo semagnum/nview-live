@@ -78,7 +78,7 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     window_manager = bpy.types.WindowManager
-    for name, prop in properties[::-1]:
+    for name, _ in properties[::-1]:
         try:
             delattr(window_manager, name)
         except AttributeError:

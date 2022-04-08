@@ -18,7 +18,7 @@ class BoundBoxCache:
         if obj.name_full in self.object_cache:
             return self.object_cache[obj.name_full]
 
-        # coelesce bound box based on collection
+        # coalesce bound box based on collection
         # cannot cache with matrix_world, so that will need to be calculated each time
         if obj.is_instancer and obj.instance_type == 'COLLECTION':
             coll_name = obj.instance_collection.name
