@@ -9,4 +9,7 @@ disable=import-error,
 
 max-line-length=120
 
+# forces pylint to only use one job
+jobs=1
+
 good-names=i,j,df,nview-live
