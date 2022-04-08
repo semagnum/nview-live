@@ -1,0 +1,92 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+.logo {
+    margin-bottom: 20px;
+}
+
+@media print, screen and (min-width: 961px) {
+  section {
+    padding-bottom: 0;
+  }
+}
+
+@media print, screen and (max-width: 960px) {
+    header ul {
+        position: initial;
+        right: 0;
+        top: 0;
+    }
+}
+
+
+a:hover, a:focus {
+    font-weight: initial;
+    text-shadow: 1px 0px 0px #069;
+}
+h1 {
+    a:hover, a:focus {
+        font-weight: bold;
+        text-shadow: 1px 0px 0px #069;
+    }
+}
+
+ol ol {
+    margin: 0px;
+    li {
+        list-style-type: square;
+    }
+}
+
+img[src*="#donateimg"] {
+    height: 40px;
+}
+
+ul.tabs {
+  list-style:none;
+  height:40px;
+  padding:0;
+  background: #f4f4f4;
+  border-radius:5px;
+  border:1px solid #e0e0e0;
+  width:100%;
+}
+
+.tabs li {
+  width:25%;
+  box-sizing:border-box;
+  border-right:1px solid #e0e0e0;
+  height:100%;
+  float:left;
+}
+
+.tabs li:first-child a {
+  border-radius:5px 0 0 5px;
+}
+
+.tabs li:last-child {
+  border-right:none;
+  a {
+    border-radius:0 5px 5px 0;
+  }
+}
+
+.tabs a {
+  line-height:1;
+  color:#676767;
+  display:block;
+  text-align:center;
+  padding-top:6px;
+  height:34px;
+}
+
+.tabs a:hover, .tabs a:focus {
+  color:#675C5C;
+}
+
+.tabs ul a:active {
+  background-color:#f0f0f0;
+}
+

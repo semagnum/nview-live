@@ -1,0 +1,16 @@
+# installing assets: 'bundle install'
+# local serve: 'bundle exec jekyll serve'
+# If you change this file, please restart the server process.
+#
+# You can access these variables via {{ site.title }}, {{ site.email }}, etc.
+
+title: nView Live
+email: semagnum+nview@gmail.com
+description: Official documentation
+github_username: semagnum
+logo: assets/img/nview-live-logo.png
+
+# Build settings
+remote_theme: pages-themes/minimal@v0.2.0
+plugins:
+- jekyll-remote-theme
