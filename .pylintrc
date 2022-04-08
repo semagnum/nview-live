@@ -1,0 +1,12 @@
+﻿[MASTER]
+disable=import-error,
+        import-outside-toplevel,
+        missing-class-docstring,
+        missing-function-docstring,
+        missing-module-docstring,
+        no-self-use,
+        too-few-public-methods,
+
+max-line-length=120
+
+good-names=i,j,df,nview-live
