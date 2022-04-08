@@ -10,7 +10,7 @@
 
 ## Okay, I enabled nView Live, where is it? {#finding-nview-live}
 
-1. Open the right toolbar for the the 3D viewport (the default shortcut is to press "T")
+1. Open the right toolbar for the 3D view (the default shortcut is "T")
 2. Click the "nView" tab
 
 Here you will see the nView Live panel. If you do not, it may be an error.
@@ -18,8 +18,12 @@ Learn how you can report it [here](/contribute#report-bugs).
 
 ## Panel settings {#finding-nview-live}
 
+- Delay - time in seconds to wait before running the visibility check after the viewport has updated.
 - Maximum distance - any objects further than this distance from the camera will be
 excluded from budget testing and automatically hidden.
+- Show Hidden objects - this button operator shows all hidden objects
+and acts as a reset button.
+This is the same operator as the one defaulted to the Alt-H keyboard shortcut.
 
 ### Budget subpanel
 You can toggle budget prioritization as well as the following options:
@@ -40,7 +44,8 @@ ascending (lowest to highest cost) or descending (highest to lowest cost).
 ### Modal settings
 
 Once you click the operator button, a modal window will appear with more settings:
-- Delay - time in seconds to wait before running the visibility check after the viewport has updated.
+- Exclude instanced objects - objects within instanced collections
+are excluded from visibility tests (disabling this can result in instanced collections being partially hidden).
 - Object types - the types of objects to include in visibility tests:
   - meshes
   - instanced collections
@@ -54,6 +59,5 @@ You can use all the navigation-related commands, including FPS view, as well
 as the animation playback.
 
 Since this addon's main feature is exposed as a modal operator,
-any other modal operation will cancel it
-(such as using "G" to grab an object).
+any other modal operation will cancel it (such as using "G" to grab an object).
 Otherwise, this modal will run in the background as you navigate your scene.

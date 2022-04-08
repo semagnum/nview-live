@@ -8,7 +8,7 @@ from .frame_handler import viewport_handler, add_viewport_handler, remove_viewpo
 from .budget import budget_factory
 from .BoundBoxCache import BoundBoxCache
 
-allowed_navigation_types = {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'RIGHTMOUSE', 'LEFTMOUSE' }
+allowed_navigation_types = {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'RIGHTMOUSE', 'LEFTMOUSE'}
 
 
 def build_obj_budget_cost_cache(all_objs, context):
@@ -25,17 +25,6 @@ class NL_OT_ViewportLive(bpy.types.Operator):
     bl_description = 'Automatically hide/show objects in the viewport'
     bl_options = {'REGISTER'}
 
-    run_delay: bpy.props.FloatProperty(
-        name='Update delay',
-        description='Delay before nView starts updating after view change (in seconds)',
-        default=1.0,
-        min=0.1,
-        subtype='TIME',
-        unit='TIME',
-        soft_min=0.1,
-        soft_max=2.0,
-    )
-
     exclude_objs_in_instances: bpy.props.BoolProperty(name='Exclude instanced objects',
                                                       description='Exclude objects in collection instances from '
                                                                   'visibility tests (can make instances seem hidden '
@@ -46,7 +35,6 @@ class NL_OT_ViewportLive(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, 'run_delay', slider=True)
         layout.prop(self, 'exclude_objs_in_instances')
 
         layout.label(text='Object types:')
@@ -77,17 +65,20 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         return {'CANCELLED'}
 
     def modal(self, context, event):
-        for kc in context.window_manager.keyconfigs:
+        window_manager = context.window_manager
+        for kc in window_manager.keyconfigs:
             for km in kc.keymaps:
                 found_keymap = km.keymap_items.match_event(event)
                 if found_keymap is not None and (found_keymap.idname.startswith('view3d')
-                        or (km.name == 'Frames' and found_keymap.idname.startswith('screen'))):
+                                                 or (km.name == 'Frames' and found_keymap.idname.startswith('screen'))):
                     return {'PASS_THROUGH'}
 
         if event.type in {'ESC', 'RIGHTMOUSE'}:
             return self.cancel(context)
 
-        if self.last_call > self.run_delay and not self.has_updated:
+        run_delay = window_manager.nl_run_delay
+        curr_time = time.time()
+        if (curr_time - self.last_call) > run_delay and not self.has_updated:
             self.has_updated = True
             try:
                 viewport_handler(context, self.viable_objs, self.cost_cache, self.bb_cache)

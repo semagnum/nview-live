@@ -50,6 +50,12 @@ properties = [
                                                             'TRIA_DOWN', 1),
                                                            ],
                                                     default='descending')),
+    ('nl_run_delay', bpy.props.FloatProperty(name='Update delay',
+                                             description='Delay before the visibility update'
+                                                         'after viewport refresh change (in seconds)',
+                                             default=0.15, min=0.01,
+                                             subtype='TIME', unit='TIME',
+                                             soft_min=0.1, soft_max=1.0)),
     ('nl_max_objects', bpy.props.IntProperty(name='Max objects',
                                              description='Max number of viable objects to show at a time',
                                              default=100, min=1, soft_min=10, soft_max=10000)),
