@@ -14,7 +14,7 @@
 2. Click the "nView" tab
 
 Here you will see the nView Live panel. If you do not, it may be an error.
-Learn how you can report it [here](/contribute#report-bugs).
+Learn how you can report it [here](/nview-live/contribute#report-bugs).
 
 ## Panel settings {#finding-nview-live}
 

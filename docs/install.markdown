@@ -7,7 +7,7 @@
 5. Once the file window closes, the addon list should filter itself to only show nView Live
 6. Check the box to enable it.
 If an error appears on this step, please report it.
-Learn more [here](/contribute#report-bugs).
+Learn more [here](/nview-live/contribute#report-bugs).
 
 ### Updating nView Live with a new version? Do this!
 1. Go to the main toolbar, select "Edit" and click "Preferences..."
@@ -16,7 +16,7 @@ Learn more [here](/contribute#report-bugs).
 4. Click the dropdown arrow to expand the details on the nView Live addon
 5. Click the "Remove" button
 If an error appears on this step, please report it.
-Learn more [here](/contribute#report-bugs).
+Learn more [here](/nview-live/contribute#report-bugs).
 6. Close Blender
    1. This is important because Blender caches addons while it's running.
    The new version of the addon may not seem to be correct if you install immediately after.
