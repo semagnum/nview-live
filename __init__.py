@@ -12,7 +12,9 @@ bl_info = {
     "description": 'Gives live updates of visibility of mesh objects',
     "location": 'View 3D > Tools',
     "support": 'COMMUNITY',
-    "category": '3D View'
+    "category": '3D View',
+    "doc_url": 'https://semagnum.github.io/nview-live/',
+    "tracker_url": 'https://github.com/semagnum/nview-live/issues',
 }
 
 classes = [ObjType, NL_OT_ViewportLive, NL_PT_NViewLive, NL_PT_Budgeting]

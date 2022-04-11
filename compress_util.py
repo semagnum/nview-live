@@ -5,11 +5,13 @@ import re
 allowed_file_extensions = {'.py'}
 
 
-def zipdir(path, ziph):
+def zipdir(path, ziph: zipfile.ZipFile, zip_subdir_name):
     for root, dirs, files in os.walk(path):
         for file in files:
             if any(file.endswith(ext) for ext in allowed_file_extensions):
-                ziph.write(os.path.join(root, file))
+                orig_hier = os.path.join(root, file)
+                arc_hier = os.path.join(zip_subdir_name, orig_hier)
+                ziph.write(orig_hier, arc_hier)
 
 
 def generate_zip_filename(addon_name):
@@ -28,12 +30,18 @@ def get_addon_version(init_path):
             return match_major, match_minor, match_patch
 
 
-filename = generate_zip_filename('nView-live')
-try:
-    zipf = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED)
-    zipdir('.', zipf)
-    zipf.close()
-    print('Successfully created zip file: {}'.format(filename))
-except Exception as e:
-    print('Failed to create {}: {}'.format(filename, e))
-    exit(1)
+def zip_main(addon_name):
+    filename = generate_zip_filename(addon_name)
+    lower_name = addon_name.lower()
+    try:
+        zipf = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED)
+        zipdir('.', zipf, lower_name)
+        zipf.close()
+        print('Successfully created zip file: {}'.format(filename))
+    except Exception as e:
+        print('Failed to create {}: {}'.format(filename, e))
+        exit(1)
+
+
+if __name__ == '__main__':
+    zip_main('nView-live')
