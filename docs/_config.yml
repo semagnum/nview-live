@@ -1,5 +1,5 @@
 # installing assets: 'bundle install'
-# local serve: 'bundle exec jekyll serve'
+# local serve: 'bundle exec jekyll serve -b /nview-live'
 # If you change this file, please restart the server process.
 #
 # You can access these variables via {{ site.title }}, {{ site.email }}, etc.
