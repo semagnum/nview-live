@@ -19,11 +19,25 @@ def build_obj_budget_cost_cache(all_objs, context):
     return budget_cache, bound_box_cache
 
 
+def is_nav_allowed(keyconfigs, event):
+    keymaps = ((km.name, km.keymap_items.match_event(event))
+               for kc in keyconfigs
+               for km in kc.keymaps)
+    return any(km is not None and (km.idname.startswith('view3d')
+                                   or (km_name == 'Frames' and km.idname.startswith('screen')))
+               for km_name, km in keymaps)
+
+
 class NL_OT_ViewportLive(bpy.types.Operator):
     bl_idname = 'semagnum_nview_live.viewport'
     bl_label = 'Run nView Live'
     bl_description = 'Automatically hide/show objects in the viewport'
     bl_options = {'REGISTER'}
+
+    playback_mode: bpy.props.BoolProperty(name='Playback Mode',
+                                          description='Will constantly refresh viewport based on delay setting,'
+                                                      'ideal for previewing animations',
+                                          default=False)
 
     exclude_objs_in_instances: bpy.props.BoolProperty(name='Exclude instanced objects',
                                                       description='Exclude objects in collection instances from '
@@ -35,6 +49,7 @@ class NL_OT_ViewportLive(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
+        layout.prop(self, 'playback_mode')
         layout.prop(self, 'exclude_objs_in_instances')
 
         layout.label(text='Object types:')
@@ -66,19 +81,18 @@ class NL_OT_ViewportLive(bpy.types.Operator):
 
     def modal(self, context, event):
         window_manager = context.window_manager
-        for kc in window_manager.keyconfigs:
-            for km in kc.keymaps:
-                found_keymap = km.keymap_items.match_event(event)
-                if found_keymap is not None and (found_keymap.idname.startswith('view3d')
-                                                 or (km.name == 'Frames' and found_keymap.idname.startswith('screen'))):
-                    return {'PASS_THROUGH'}
+        if is_nav_allowed(window_manager.keyconfigs, event):
+            return {'PASS_THROUGH'}
 
         if event.type in {'ESC', 'RIGHTMOUSE'}:
             return self.cancel(context)
 
         run_delay = window_manager.nl_run_delay
         curr_time = time.time()
-        if (curr_time - self.last_call) > run_delay and not self.has_updated:
+        should_update_playback_mode = self.playback_mode and (curr_time - self.last_run) > run_delay
+        should_update_normal_mode = ((curr_time - self.last_call) > run_delay and not self.has_updated)
+        if should_update_playback_mode or should_update_normal_mode:
+            self.last_run = curr_time
             self.has_updated = True
             try:
                 viewport_handler(context, self.viable_objs, self.cost_cache, self.bb_cache)
@@ -94,6 +108,7 @@ class NL_OT_ViewportLive(bpy.types.Operator):
             return {'CANCELLED'}
 
         self.last_call = time.time()
+        self.last_run = time.time()
         self.has_updated = False
         wm = context.window_manager
 
@@ -101,7 +116,12 @@ class NL_OT_ViewportLive(bpy.types.Operator):
 
         self.update_caches(context)
 
-        context.area.header_text_set("nView Live enabled. RMB, ESC: cancel")
+        if self.playback_mode:
+            header_text = 'nView Live playback mode. RMB, ESC: cancel'
+        else:
+            header_text = 'nView Live enabled. RMB, ESC: cancel'
+
+        context.area.header_text_set(header_text)
 
         self._handler = add_viewport_handler(self)
         context.window_manager.modal_handler_add(self)

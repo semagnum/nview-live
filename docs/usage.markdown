@@ -19,6 +19,7 @@ Learn how you can report it [here](/nview-live/contribute#report-bugs).
 ## Panel settings {#finding-nview-live}
 
 - Delay - time in seconds to wait before running the visibility check after the viewport has updated.
+For playback mode, this is the constant interval between each run of the visibility check.
 - Maximum distance - any objects further than this distance from the camera will be
 excluded from budget testing and automatically hidden.
 - Show Hidden objects - this button operator shows all hidden objects
@@ -44,6 +45,9 @@ ascending (lowest to highest cost) or descending (highest to lowest cost).
 ### Modal settings
 
 Once you click the operator button, a modal window will appear with more settings:
+- Playback mode - Ideal mode for previewing animations.
+Instead of updating with a delay after viewport refresh,
+the modal refreshes at regular intervals (based on delay setting).
 - Exclude instanced objects - objects within instanced collections
 are excluded from visibility tests (disabling this can result in instanced collections being partially hidden).
 - Object types - the types of objects to include in visibility tests:
