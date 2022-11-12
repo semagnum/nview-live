@@ -7,7 +7,7 @@ from .nview_live_panel import NL_PT_NViewLive, NL_PT_Budgeting
 bl_info = {
     "name": 'nView Live Blender Addon',
     "author": 'Spencer Magnusson',
-    "version": (0, 1, 7),
+    "version": (0, 1, 8),
     "blender": (3, 0, 0),
     "description": 'Gives live updates of visibility of mesh objects',
     "location": 'View 3D > Tools',
