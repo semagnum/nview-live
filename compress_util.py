@@ -2,7 +2,7 @@ import os
 import zipfile
 import re
 
-allowed_file_extensions = {'.py'}
+allowed_file_extensions = {'.py', 'LICENSE'}
 
 
 def zipdir(path, ziph: zipfile.ZipFile, zip_subdir_name):
