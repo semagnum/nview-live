@@ -126,7 +126,7 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         self.update_caches(context)
 
         if self.playback_mode:
-            header_text = 'nView Live playback mode. RMB, ESC: cancel'
+            header_text = 'nView Live (playback mode) enabled. RMB, ESC: cancel'
         else:
             header_text = 'nView Live enabled. RMB, ESC: cancel'
 
