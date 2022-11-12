@@ -14,7 +14,7 @@ class BoundBoxCache:
         self.collection_cache = {}
         self.object_cache = {}
 
-    def bound_box_calc(self, obj, min_box_size=0.1):
+    def bound_box_calc(self, obj, min_box_size):
         if obj.name_full in self.object_cache:
             return self.object_cache[obj.name_full]
 
@@ -29,7 +29,7 @@ class BoundBoxCache:
             coll_instance_offset.negate()
             bound_boxes = [
                               [v + coll_instance_offset for v in
-                               self.bound_box_calc(coll_obj)]
+                               self.bound_box_calc(coll_obj, min_box_size)]
                               for coll_obj
                               in obj.instance_collection.all_objects] + [obj.bound_box]
             x1, x2 = min((x for b in bound_boxes for x, _, _ in b)), max((x for b in bound_boxes for x, _, _ in b))

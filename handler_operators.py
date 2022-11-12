@@ -11,11 +11,12 @@ from .BoundBoxCache import BoundBoxCache
 allowed_navigation_types = {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'RIGHTMOUSE', 'LEFTMOUSE'}
 
 
-def build_obj_budget_cost_cache(all_objs, context):
+def build_obj_budget_cost_cache(all_objs, context, min_box_size):
     budgeter = budget_factory(context)()
     budget_cache = {obj.name_full: budgeter.budget_cost(context, obj) for obj in all_objs}
     bb_cache_calculator = BoundBoxCache()
-    bound_box_cache = {obj.name_full: bb_cache_calculator.bound_box_calc(obj) for obj in all_objs}
+    bound_box_cache = {obj.name_full: bb_cache_calculator.bound_box_calc(obj, min_box_size)
+                       for obj in all_objs}
     return budget_cache, bound_box_cache
 
 
@@ -47,8 +48,16 @@ class NL_OT_ViewportLive(bpy.types.Operator):
 
     obj_types: bpy.props.CollectionProperty(type=ObjType)
 
+    min_box_size: bpy.props.FloatProperty(name='Minimum Bounding Box Size',
+                                          description='Minimum bounding box size for objects'
+                                                      'without a determinable size'
+                                                      '(such as lights or non-instancing empties)',
+                                          unit='LENGTH', subtype='DISTANCE',
+                                          default=0.1, min=0.001, soft_min=0.1, soft_max=1.0)
+
     def draw(self, context):
         layout = self.layout
+        layout.prop(self, 'min_box_size')
         layout.prop(self, 'playback_mode')
         layout.prop(self, 'exclude_objs_in_instances')
 
@@ -70,7 +79,7 @@ class NL_OT_ViewportLive(bpy.types.Operator):
                             and o.name_full not in excluded_objs
                             and not o.hide_viewport}
 
-        self.cost_cache, self.bb_cache = build_obj_budget_cost_cache(self.viable_objs, context)
+        self.cost_cache, self.bb_cache = build_obj_budget_cost_cache(self.viable_objs, context, self.min_box_size)
         self.report({'INFO'}, 'Caching done, ready to use')
 
     def cancel(self, context):

@@ -45,6 +45,9 @@ ascending (lowest to highest cost) or descending (highest to lowest cost).
 ### Modal settings
 
 Once you click the operator button, a modal window will appear with more settings:
+- Minimum Bounding Box Size - For objects
+without a determinable size (such as lights or non-instancing empties),
+they will be given a minimum bounding box of at least this size. 
 - Playback mode - Ideal mode for previewing animations.
 Instead of updating with a delay after viewport refresh,
 the modal refreshes at regular intervals (based on delay setting).
