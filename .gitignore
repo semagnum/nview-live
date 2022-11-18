@@ -1,2 +1,5 @@
 .idea/
 .vscode/
+
+# ignore the target zip files
+*.zip
