@@ -19,8 +19,8 @@ class NL_PT_NViewLive(bpy.types.Panel):
         layout.operator(NL_OT_ViewportLive.bl_idname)
 
         layout.separator()
-        layout.prop(window_manager, 'nl_run_delay', slider=True)
-        layout.prop(window_manager, 'nl_max_distance', slider=True)
+        layout.prop(window_manager, 'nl_run_delay')
+        layout.prop(window_manager, 'nl_max_distance')
         layout.operator('object.hide_view_clear', icon='HIDE_OFF')
 
 

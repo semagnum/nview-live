@@ -5,11 +5,11 @@ from .handler_operators import NL_OT_ViewportLive
 from .nview_live_panel import NL_PT_NViewLive, NL_PT_Budgeting
 
 bl_info = {
-    "name": 'nView Live Blender Addon',
+    "name": 'nView Live',
     "author": 'Spencer Magnusson',
-    "version": (0, 1, 8),
+    "version": (0, 1, 9),
     "blender": (3, 0, 0),
-    "description": 'Gives live updates of visibility of mesh objects',
+    "description": 'Updates visibility of objects in realtime for viewport performance',
     "location": 'View 3D > Tools',
     "support": 'COMMUNITY',
     "category": '3D View',
@@ -23,7 +23,7 @@ properties = [
                                                 description='Maximum distance of objects allowed to test visibility',
                                                 default=100.0,
                                                 unit='LENGTH', subtype='DISTANCE',
-                                                min=0.0, soft_min=0.0, soft_max=1000.0, step=100)),
+                                                min=0.0, soft_min=1.0, soft_max=1000.0, step=100)),
     ('nl_tri_budget', bpy.props.IntProperty(name='Max Tris',
                                             description='Maximum number of triangles to show in viewport',
                                             default=300000, min=1, soft_min=1000, soft_max=10000000)),
