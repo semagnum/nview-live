@@ -3,9 +3,7 @@
 ---
 ## Learn
 
-This addon automatically toggles an object's visibility setting
-based on its current visibility in the viewport.
-This helps optimize viewport performance.
+This addon toggles an object's visibility in the viewport in realtime.
 The main focus is to improve viewport performance in solid view.
 
 Ideally, this addon could be converted into source code within Blender,

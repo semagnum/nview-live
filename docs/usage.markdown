@@ -10,7 +10,7 @@
 
 ## Okay, I enabled nView Live, where is it? {#finding-nview-live}
 
-1. Open the right toolbar for the 3D view (the default shortcut is "T")
+1. Open the right toolbar for the 3D view (the default shortcut is "n")
 2. Click the "nView" tab
 
 Here you will see the nView Live panel. If you do not, it may be an error.
