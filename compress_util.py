@@ -1,8 +1,8 @@
 import os
 import zipfile
-import re
+import ast
 
-allowed_file_extensions = {'.py', 'LICENSE'}
+allowed_file_extensions = {'.py', 'LICENSE', '.md'}
 
 
 def zipdir(path, ziph: zipfile.ZipFile, zip_subdir_name):
@@ -20,14 +20,17 @@ def generate_zip_filename(addon_name):
 
 
 def get_addon_version(init_path):
-    version_reg = re.compile(r'"version":\s*\((\d+)\D*(\d+)\D*(\d+)\)')
     with open(init_path, 'r') as f:
-        whole_file = ''.join(f.readlines())
-        version_match = version_reg.search(whole_file)
-        if version_match:
-            match_major, match_minor, match_patch = version_match.group(1), version_match.group(2), version_match.group(
-                3)
-            return match_major, match_minor, match_patch
+        node = ast.parse(f.read())
+
+    n: ast.Module
+    for n in ast.walk(node):
+        for b in n.body:
+            if isinstance(b, ast.Assign) and isinstance(b.value, ast.Dict) and (
+                    any(t.id == 'bl_info' for t in b.targets)):
+                bl_info_dict = ast.literal_eval(b.value)
+                return bl_info_dict['version']
+    raise ValueError('Cannot find bl_info')
 
 
 def zip_main(addon_name):
