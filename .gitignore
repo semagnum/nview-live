@@ -3,3 +3,5 @@
 
 # ignore the target zip files
 *.zip
+_build/
+venv/
