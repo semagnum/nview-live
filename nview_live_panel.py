@@ -5,6 +5,7 @@ from .budget import budget_factory
 
 
 class NL_PT_NViewLive(bpy.types.Panel):
+    """nView Live panel, located in the 3D View."""
     bl_space_type = 'VIEW_3D'
     bl_label = 'nView Live'
     bl_category = 'nView'
@@ -25,6 +26,7 @@ class NL_PT_NViewLive(bpy.types.Panel):
 
 
 class NL_PT_Budgeting(bpy.types.Panel):
+    """nView Live subpanel for budget managing."""
     bl_space_type = 'VIEW_3D'
     bl_label = 'Budgeting'
     bl_category = 'nView'

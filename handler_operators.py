@@ -11,7 +11,14 @@ from .BoundBoxCache import BoundBoxCache
 allowed_navigation_types = {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'RIGHTMOUSE', 'LEFTMOUSE'}
 
 
-def build_obj_budget_cost_cache(all_objs, context, min_box_size):
+def build_obj_budget_cost_cache(all_objs: list[bpy.types.Object],
+                                context: bpy.types.Context, min_box_size: float) -> tuple[dict, dict]:
+    """Returns a tuple of (budget cache, bounding box cache), where the keys are object names.
+
+    :param all_objs: all objects in the scene.
+    :param context: Blender context.
+    :param min_box_size: minimum allowed bounding box size per object.
+    """
     budgeter = budget_factory(context)()
     budget_cache = {obj.name_full: budgeter.budget_cost(context, obj) for obj in all_objs}
     bb_cache_calculator = BoundBoxCache()
@@ -20,7 +27,12 @@ def build_obj_budget_cost_cache(all_objs, context, min_box_size):
     return budget_cache, bound_box_cache
 
 
-def is_nav_allowed(keyconfigs, event):
+def is_nav_allowed(keyconfigs: bpy.types.KeyConfig, event: bpy.types.Event) -> bool:
+    """Returns True if user event is for 3D viewport navigation, False otherwise.
+
+    :param keyconfigs: Blender keymap configuration.
+    :param event: user event (pressing a key, moving the mouse, etc.).
+    """
     keymaps = ((km.name, km.keymap_items.match_event(event))
                for kc in keyconfigs
                for km in kc.keymaps)
@@ -30,6 +42,7 @@ def is_nav_allowed(keyconfigs, event):
 
 
 class NL_OT_ViewportLive(bpy.types.Operator):
+    """Runs a modal in the 3D view. Anything outside the viewport or over the user-specified budget is hidden."""
     bl_idname = 'semagnum_nview_live.viewport'
     bl_label = 'Run nView Live'
     bl_description = 'Automatically hide/show objects in the viewport'
@@ -39,14 +52,23 @@ class NL_OT_ViewportLive(bpy.types.Operator):
                                           description='Will constantly refresh viewport based on delay setting,'
                                                       'ideal for previewing animations',
                                           default=False)
+    """If True, the operator will update on a scheduled basis determined by the delay setting.
+    If False, the operator will only update after the viewport has stopped refreshing.
+    
+    Playback mode is ideal for previewing animations where the viewport is updating constantly.
+    """
 
     exclude_objs_in_instances: bpy.props.BoolProperty(name='Exclude instanced objects',
                                                       description='Exclude objects in collection instances from '
                                                                   'visibility tests (can make instances seem hidden '
                                                                   'when they are not)',
                                                       default=True)
+    """If True, any objects instanced in collections are automatically omitted from evaluation.
+    Otherwise, any objects hidden in the instanced collection will be hidden in all instances.
+    """
 
     obj_types: bpy.props.CollectionProperty(type=ObjType)
+    """Object types that can be hidden or revealed in the viewport by nView Live."""
 
     min_box_size: bpy.props.FloatProperty(name='Minimum Bounding Box Size',
                                           description='Minimum bounding box size for objects'
@@ -54,8 +76,13 @@ class NL_OT_ViewportLive(bpy.types.Operator):
                                                       '(such as lights or non-instancing empties)',
                                           unit='LENGTH', subtype='DISTANCE',
                                           default=0.1, min=0.001, soft_min=0.1, soft_max=1.0)
+    """Minimum bounding box size for objects without a determinable size (e.g. lights)."""
 
-    def draw(self, context):
+    def draw(self, _context: bpy.types.Context):
+        """Draws a UI panel for user to pick settings before running the modal.
+
+        :param _context: Blender context
+        """
         layout = self.layout
         layout.prop(self, 'min_box_size')
         layout.prop(self, 'playback_mode')
@@ -66,7 +93,11 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         for obj_type in self.obj_types.values():
             col.prop(obj_type, 'enabled', text=obj_type.obj_name, toggle=True, icon=obj_type.icon)
 
-    def update_caches(self, context):
+    def update_caches(self, context: bpy.types.Context):
+        """Updates bounding box and budget caches for objects.
+
+        :param context: Blender context
+        """
         excluded_objs = set()
         if self.exclude_objs_in_instances:
             excluded_objs = {o.name_full for o in find_instanced_objs_in_colls(context.scene.collection)}
@@ -83,12 +114,14 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         self.report({'INFO'}, 'Caching done, ready to use')
 
     def cancel(self, context):
+        """Cleanup function before canceling the modal operator."""
         context.window_manager.nl_is_running = False
         context.area.header_text_set(text=None)
         remove_viewport_handler(self._handler)
         return {'CANCELLED'}
 
     def modal(self, context, event):
+        """Code triggered on a regular basis while the modal is running."""
         window_manager = context.window_manager
         if is_nav_allowed(window_manager.keyconfigs, event):
             return {'PASS_THROUGH'}
@@ -112,6 +145,7 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         return {'PASS_THROUGH'}
 
     def execute(self, context):
+        """Code run on initial execution of modal operator."""
         if context.area.type != 'VIEW_3D':
             self.report({'WARNING'}, "View3D not found, cannot run operator")
             return {'CANCELLED'}
@@ -137,6 +171,7 @@ class NL_OT_ViewportLive(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
+        """Opens dialog box for users to choose operator settings."""
         for obj_type, obj_name, icon, enabled in obj_types:
             new_type = self.obj_types.add()
             new_type.obj_type = obj_type

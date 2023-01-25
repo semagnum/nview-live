@@ -1,13 +1,23 @@
+import bpy
+
 from .BaseBudget import BaseBudget
 from .stat_format_util import format_num
 
 
 class VertBudget(BaseBudget):
+    """Budget manager by setting an upper limit of vertices visible in the scene."""
 
     def __init__(self):
         self.collection_cache = {}
 
-    def get_vert_count(self, obj):
+    def get_vert_count(self, obj: bpy.types.Object):
+        """Retrieves triangle count for any given object.
+
+        For instanced collections, it will recursively sum up all child mesh object triangle counts.
+        Uses caching in case the same collection is referenced multiple times.
+
+        :param obj: object to retrieve triangle data from
+        """
         if obj.type == 'MESH':
             return len(obj.data.vertices)
         elif obj.type == 'EMPTY' and obj.is_instancer and obj.instance_type == 'COLLECTION':
@@ -19,13 +29,27 @@ class VertBudget(BaseBudget):
             return instance_cost
         return 0
 
-    def budget_limit(self, context) -> int:
+    def budget_limit(self, context: bpy.types.Context) -> int:
+        """Returns the user-specified upper limit of vertices for the scene.
+
+        :param context: Blender context
+        """
         return context.window_manager.nl_vert_budget
 
-    def budget_cost(self, context, obj) -> int:
+    def budget_cost(self, context: bpy.types.Context, obj: bpy.types.Object) -> int:
+        """Calculates and returns the cost of an object to be visible in the scene.
+
+        :param context: Blender context
+        :param obj: Blender object's cost to be counted
+        """
         return self.get_vert_count(obj)
 
-    def draw(self, context, layout):
+    def draw(self, context: bpy.types.Context, layout: bpy.types.UILayout):
+        """Draws object budget parameters in panel.
+
+        :param context: Blender context
+        :param layout: bpy.types.UILayout
+        """
         wm = context.window_manager
         row = layout.row()
         row.prop(wm, 'nl_vert_budget', slider=True)

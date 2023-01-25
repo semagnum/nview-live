@@ -1,20 +1,38 @@
+import bpy
 from mathutils import Vector
 
 bound_box_base = [(-1.0, -1.0, -1.0), (-1.0, -1.0, 1.0), (-1.0, 1.0, 1.0), (-1.0, 1.0, -1.0),
                   (1.0, -1.0, -1.0), (1.0, -1.0, 1.0), (1.0, 1.0, 1.0), (1.0, 1.0, -1.0)]
 
 
-def valid_bound_box(obj):
+def valid_bound_box(obj: bpy.types.Object) -> bool:
+    """Returns if object has a valid bounding box.
+
+    For objects that do not take up space (e.g. light), it may set all the box corners to be a single point.
+    In these cases, they are invalid and we need to calculate the box or set a default ourselves.
+    
+    :param obj: object to be checked
+    """
     return not all([obj.bound_box[0][0] == obj.bound_box[i][j] for i in range(8) for j in range(3)])
 
 
 class BoundBoxCache:
+    """Blender object wrapper to hold cache of bounding boxes."""
 
     def __init__(self):
         self.collection_cache = {}
         self.object_cache = {}
 
-    def bound_box_calc(self, obj, min_box_size):
+    def bound_box_calc(self, obj: bpy.types.Object, min_box_size: float) -> list[Vector]:
+        """Returns - as a list of corners - an object's existing bounding box,
+        otherwise calculates one based on object type.
+
+        If the object is instancing a collection,
+        the function recursively calculates an enclosing box around all the instance's objects.
+
+        :param obj:
+        :param min_box_size:
+        """
         if obj.name_full in self.object_cache:
             return self.object_cache[obj.name_full]
 
