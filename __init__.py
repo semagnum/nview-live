@@ -7,7 +7,7 @@ from .nview_live_panel import NL_PT_NViewLive, NL_PT_Budgeting
 bl_info = {
     "name": 'nView Live',
     "author": 'Spencer Magnusson',
-    "version": (0, 1, 9),
+    "version": (0, 1, 10),
     "blender": (3, 0, 0),
     "description": 'Updates visibility of objects in realtime for viewport performance',
     "location": 'View 3D > Tools',
