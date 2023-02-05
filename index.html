@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <link rel="icon" href="_static/favicon.ico" type="image/x-icon">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Official Documentation &mdash; nView Live  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="" src="_static/documentation_options.js"></script>
+        <script data-url_root="#" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex/" />
+    <link rel="search" title="Search" href="search/" />
+    <link rel="next" title="Usage" href="use/" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> nView Live
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/semagnum/nview-live">Download the add-on</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use/">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use/#panel-settings">Panel settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nview-live/">Python Docs</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">nView Live</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Official Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <img alt="_images/nview-live-logo.png" src="_images/nview-live-logo.png" />
+<section id="official-documentation">
+<h1>Official Documentation<a class="headerlink" href="#official-documentation" title="Permalink to this heading">¶</a></h1>
+<p>This addon toggles an object’s visibility in the viewport in realtime.
+The main focus is to improve viewport performance in solid view.</p>
+<p>Ideally, this addon could be converted into source code within Blender,
+which would drastically improve this feature’s performance and reliability.
+Since it is relatively effective as an addon, I consider this a proof
+of concept for the future and a useful tool for existing artists
+with large, diverse scenes.</p>
+<p>This addon supports Blender 3.0 and above (it may be compatible on older versions
+but not guaranteed). This addon’s functionality does _not_ guarantee
+any performance ideal, such as an animation playback framerate.
+In many cases, viewport performance is project-specific and requires scene management.
+Neither does this addon bake visibility settings for renders or set render visibility.
+For scene management and baking of visibility settings, see
+my original <a class="reference external" href="https://blendermarket.com/products/nview">nView addon on Blender Market</a>.</p>
+<p>When the nView Live modal begins, it retrieves a list of objects in the scene.
+Every time the active 3D viewport refreshes, the modal is triggered to
+update visibility of all objects. The delay setting ensures the function
+is only called once the viewport has stopped refreshing for a sufficient
+amount of time, making it easier for users to navigate quickly and then
+see updates once they’ve chosen a given view.
+Using the caches, the callback checks which objects are visible.</p>
+<p>If budgeting is enabled, it will track the objects currently visible
+and the viewport cost. Any remaining objects are hidden.
+The budget prioritizes objects closest to the viewport camera’s location,
+as well as the user’s chosen budget priority.
+If two objects have the same cost, the object closest to the camera is prioritized.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/semagnum/nview-live">Download the add-on</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use/">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="use/#okay-i-installed-nview-live-where-is-it">Okay, I installed nView Live, where is it?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="use/#panel-settings">Panel settings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="use/#budget-subpanel">Budget subpanel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="use/#modal-settings">Modal Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="use/#now-it-runs-what-else-do-i-need-to-do">Now it runs! What else do I need to do?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nview-live/">Python Docs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nview-live/#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nview-live/#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nview-live/#boundboxcache">BoundBoxCache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nview-live/#objtype">ObjType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nview-live/#collection-utilities">Collection Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nview-live/#frame-handler">Frame Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nview-live/#nview-operators">nView Operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nview-live/#nview-live-ui-panels">nView Live UI panels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nview-live/#object-config">Object Config</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex/"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex/"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search/"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="use/" class="btn btn-neutral float-right" title="Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2023, Spencer Magnusson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
